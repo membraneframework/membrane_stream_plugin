@@ -1,12 +1,12 @@
-defmodule Membrane.Template.Mixfile do
+defmodule Membrane.Stream.Mixfile do
   use Mix.Project
 
   @version "0.1.0"
-  @github_url "https://github.com/membraneframework/membrane_template_plugin"
+  @github_url "https://github.com/membraneframework/membrane_stream_plugin"
 
   def project do
     [
-      app: :membrane_template_plugin,
+      app: :membrane_stream_plugin,
       version: @version,
       elixir: "~> 1.13",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -19,7 +19,7 @@ defmodule Membrane.Template.Mixfile do
       package: package(),
 
       # docs
-      name: "Membrane Template plugin",
+      name: "Membrane Stream plugin",
       source_url: @github_url,
       homepage_url: "https://membraneframework.org",
       docs: docs()
@@ -74,7 +74,7 @@ defmodule Membrane.Template.Mixfile do
       extras: ["README.md", "LICENSE"],
       formatters: ["html"],
       source_ref: "v#{@version}",
-      nest_modules_by_prefix: [Membrane.Template]
+      nest_modules_by_prefix: [Membrane.Stream]
     ]
   end
 end
