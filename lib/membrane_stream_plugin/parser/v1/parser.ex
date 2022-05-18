@@ -1,6 +1,8 @@
 defmodule Membrane.Stream.Parser.V1.Elements do
   @moduledoc false
 
+  require Logger
+
   @magic "Action"
 
   @spec parse(binary()) ::
@@ -29,17 +31,30 @@ defmodule Membrane.Stream.Parser.V1.Elements do
   defp do_parse(_not_a_packet, _acc), do: {:error, :malformed_action}
 
   defp convert_to_actions(elements) do
-    Enum.map(elements, fn
-      {:buffer, %Membrane.Buffer{} = buffer} -> {:buffer, {:output, buffer}}
-      {:caps, caps} -> {:caps, {:output, caps}}
-      {:event, event} -> {:event, {:output, event}}
-      :end_of_stream -> {:end_of_stream, :output}
-      # Food for thought: what should we do in such a case? We could technically discard it.
-      # Technically, nothing should explode as we already handle buffers and caps.
-      # That said, we shouldn't even get here anyway in the first place and who knows what will be possible in the future
-      action -> raise "Unknown action: #{inspect(action)}"
-    end)
-    |> then(&{:ok, &1})
+    actions =
+      Enum.map(elements, fn
+        {:buffer, %Membrane.Buffer{} = buffer} ->
+          {:buffer, {:output, buffer}}
+
+        {:caps, caps} ->
+          {:caps, {:output, caps}}
+
+        {:event, event} ->
+          {:event, {:output, event}}
+
+        :end_of_stream ->
+          {:end_of_stream, :output}
+
+        action ->
+          Logger.error("Encountered unknown action: #{inspect(action)}")
+          :error
+      end)
+
+    if Enum.any?(actions, &(:error == &1)) do
+      {:error, :unknown_action}
+    else
+      {:ok, actions}
+    end
   end
 
   defp do_parse_return([], _leftover), do: {:error, :not_enough_data}
