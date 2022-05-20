@@ -6,10 +6,6 @@ defmodule Membrane.Stream.Serializer do
   @current_version 1
   @type version_t() :: 1
 
-  @serializers %{
-    1 => __MODULE__.V1
-  }
-
   def_input_pad :input,
     caps: :any,
     demand_mode: :auto,
@@ -26,8 +22,8 @@ defmodule Membrane.Stream.Serializer do
 
   @impl true
   def handle_init(%__MODULE__{version: version}) do
-    serializer = Map.get(@serializers, version)
-    {:ok, %{serializer: serializer, version: version}}
+    serializer_fn = fn action -> Membrane.Stream.Format.serialize(version, action) end
+    {:ok, %{serializer_fn: serializer_fn, version: version}}
   end
 
   @impl true
@@ -36,7 +32,7 @@ defmodule Membrane.Stream.Serializer do
 
     header =
       state.version
-      |> Membrane.Stream.Header.build_header()
+      |> Membrane.Stream.Format.Header.build_header()
       |> then(&%Buffer{payload: &1})
 
     {{:ok, caps: {:output, caps}, buffer: {:output, header}}, state}
@@ -63,7 +59,7 @@ defmodule Membrane.Stream.Serializer do
   end
 
   defp process(action, state) do
-    serialized = state.serializer.serialize(action)
+    serialized = state.serializer_fn.(action)
     {{:ok, buffer: {:output, %Buffer{payload: serialized}}}, state}
   end
 end

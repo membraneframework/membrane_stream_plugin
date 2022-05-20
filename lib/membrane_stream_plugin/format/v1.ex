@@ -1,5 +1,6 @@
-defmodule Membrane.Stream.Parser.V1.Elements do
+defmodule Membrane.Stream.Format.V1 do
   @moduledoc false
+  @behaviour Membrane.Stream.Format
 
   require Logger
 
@@ -13,6 +14,13 @@ defmodule Membrane.Stream.Parser.V1.Elements do
          {:ok, actions} <- convert_to_actions(elements) do
       {:ok, actions, leftover}
     end
+  end
+
+  @spec serialize(Membrane.Stream.Format.action_t()) :: binary()
+  def serialize(action) do
+    stringified = :erlang.term_to_binary(action)
+    size = byte_size(stringified)
+    <<"Action", size::32, stringified::binary>>
   end
 
   defp do_parse(data, acc \\ [])

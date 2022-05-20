@@ -1,4 +1,4 @@
-defmodule Membrane.Stream.Header do
+defmodule Membrane.Stream.Format.Header do
   @moduledoc false
 
   @magic "MSR"

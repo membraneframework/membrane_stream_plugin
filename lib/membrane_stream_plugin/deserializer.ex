@@ -4,11 +4,6 @@ defmodule Membrane.Stream.Deserializer do
 
   alias Membrane.{Buffer, RemoteStream}
   alias Membrane.Caps.Matcher
-  alias Membrane.Stream.Parser
-
-  @parsers %{
-    1 => Parser.V1.Elements
-  }
 
   def_input_pad :input,
     caps: {RemoteStream, content_format: Matcher.one_of([nil, Membrane.Stream])},
@@ -21,7 +16,7 @@ defmodule Membrane.Stream.Deserializer do
 
   @impl true
   def handle_init(_opts) do
-    {:ok, %{partial: <<>>, header_read?: false, parser: nil}}
+    {:ok, %{partial: <<>>, header_read?: false, parser_fn: nil}}
   end
 
   @impl true
@@ -32,10 +27,10 @@ defmodule Membrane.Stream.Deserializer do
     data = state.partial <> payload
     state = %{state | partial: data}
 
-    case Membrane.Stream.Header.parse(data) do
-      {:ok, %Membrane.Stream.Header{version: version}, leftover} ->
-        parser = Map.get(@parsers, version)
-        {:ok, %{state | parser: parser, partial: leftover, header_read?: true}}
+    case Membrane.Stream.Format.Header.parse(data) do
+      {:ok, %Membrane.Stream.Format.Header{version: version}, leftover} ->
+        parser_fn = fn data -> Membrane.Stream.Format.parse(version, data) end
+        {:ok, %{state | parser_fn: parser_fn, partial: leftover, header_read?: true}}
 
       {:error, :not_enough_data} ->
         {:ok, state}
@@ -50,7 +45,7 @@ defmodule Membrane.Stream.Deserializer do
     data = state.partial <> payload
     state = %{state | partial: data}
 
-    case state.parser.parse(data) do
+    case state.parser_fn.(data) do
       {:ok, actions, leftover} ->
         {{:ok, actions}, %{state | partial: leftover}}
 
