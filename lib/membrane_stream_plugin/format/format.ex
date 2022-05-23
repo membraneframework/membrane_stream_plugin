@@ -1,6 +1,8 @@
 defmodule Membrane.Stream.Format do
   @moduledoc false
 
+  # Module containing definition of behavior describing the implementation of specific version of the format
+
   @type action_t() ::
           {:buffer, Membrane.Buffer.t()}
           | {:event, any()}
@@ -16,14 +18,14 @@ defmodule Membrane.Stream.Format do
 
   @callback serialize(action_t()) :: binary()
 
-  @current_version 1
-  @supported_versions [@current_version]
-
-  defguard is_supported_version(version) when version in @supported_versions
-
   @implementations %{
     1 => __MODULE__.V1
   }
+
+  @supported_versions Map.keys(@implementations)
+  @current_version Enum.max(@supported_versions)
+
+  defguard is_supported_version(version) when version in @supported_versions
 
   @spec get_parser(version_t()) :: {:ok, parser_t()} | {:error, reason :: atom()}
   def get_parser(version) when is_supported_version(version) do
@@ -39,4 +41,7 @@ defmodule Membrane.Stream.Format do
   end
 
   def get_serializer(_version), do: {:error, :unsupported_version}
+
+  @spec get_current_version() :: version_t()
+  def get_current_version, do: @current_version
 end
