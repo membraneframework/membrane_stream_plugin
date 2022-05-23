@@ -54,9 +54,7 @@ defmodule Membrane.Stream.Serializer do
   end
 
   @impl true
-  def handle_end_of_stream(:input, _ctx, state) do
-    process(:end_of_stream, state)
-  end
+  def handle_end_of_stream(:input, _ctx, state), do: {{:ok, end_of_stream: :output}, state}
 
   defp process(action, state) do
     serialized = state.serializer_fn.(action)

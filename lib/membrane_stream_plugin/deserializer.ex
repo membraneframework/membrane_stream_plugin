@@ -56,13 +56,4 @@ defmodule Membrane.Stream.Deserializer do
         raise "Failed to parse Membrane Stream payload with reason: #{inspect(reason)}"
     end
   end
-
-  @impl true
-  def handle_end_of_stream(:input, ctx, state) do
-    if ctx.pads.output.end_of_stream? do
-      {:ok, state}
-    else
-      {{:ok, end_of_stream: :output}, state}
-    end
-  end
 end
