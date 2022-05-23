@@ -22,7 +22,7 @@ defmodule Membrane.Stream.Serializer do
 
   @impl true
   def handle_init(%__MODULE__{version: version}) do
-    serializer_fn = fn action -> Membrane.Stream.Format.serialize(version, action) end
+    {:ok, serializer_fn} = Membrane.Stream.Format.get_serializer(version)
     {:ok, %{serializer_fn: serializer_fn, version: version}}
   end
 

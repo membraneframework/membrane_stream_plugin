@@ -6,16 +6,18 @@ defmodule Membrane.Stream.Format do
           | {:event, any()}
           | {:caps, any()}
 
-  @callback parse(binary()) ::
-              {:ok, actions :: [Membrane.Element.Action.t()], leftover :: binary()}
-              | {:error, reason :: atom()}
+  @type version_t() :: 1
+  @type parser_t() :: (binary() -> parser_return_t())
+  @type parser_return_t() ::
+          {:ok, actions :: [Membrane.Element.Action.t()], leftover :: binary()}
+          | {:error, reason :: atom()}
+
+  @callback parse(binary()) :: parser_return_t()
 
   @callback serialize(action_t()) :: binary()
 
   @current_version 1
   @supported_versions [@current_version]
-
-  @type version_t() :: 1
 
   defguard is_supported_version(version) when version in @supported_versions
 
@@ -23,21 +25,18 @@ defmodule Membrane.Stream.Format do
     1 => __MODULE__.V1
   }
 
-  @spec parse(version_t(), binary()) ::
-          {:ok, actions :: [Membrane.Element.Action.t()], leftover :: binary()}
-          | {:error, reason :: atom()}
-  def parse(version, data) when is_supported_version(version) do
-    @implementations[version].parse(data)
+  @spec get_parser(version_t()) :: {:ok, parser_t()} | {:error, reason :: atom()}
+  def get_parser(version) when is_supported_version(version) do
+    {:ok, &@implementations[version].parse/1}
   end
 
-  def parse(_version, _data), do: {:error, :unsupported_version}
+  def get_parser(_version), do: {:error, :unsupported_version}
 
-  @spec serialize(version_t(), action_t()) :: binary()
-  def serialize(version \\ @current_version, action)
-
-  def serialize(version, action) when is_supported_version(version) do
-    @implementations[version].serialize(action)
+  @spec get_serializer(version_t()) ::
+          {:ok, (action_t() -> binary())} | {:error, reason :: atom()}
+  def get_serializer(version) when is_supported_version(version) do
+    {:ok, &@implementations[version].serialize/1}
   end
 
-  def serialize(_version, _action), do: {:error, :unsupported_version}
+  def get_serializer(_version), do: {:error, :unsupported_version}
 end

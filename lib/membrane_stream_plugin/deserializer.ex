@@ -29,7 +29,7 @@ defmodule Membrane.Stream.Deserializer do
 
     case Membrane.Stream.Format.Header.parse(data) do
       {:ok, %Membrane.Stream.Format.Header{version: version}, leftover} ->
-        parser_fn = fn data -> Membrane.Stream.Format.parse(version, data) end
+        {:ok, parser_fn} = Membrane.Stream.Format.get_parser(version)
         {:ok, %{state | parser_fn: parser_fn, partial: leftover, header_read?: true}}
 
       {:error, :not_enough_data} ->
