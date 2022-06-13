@@ -40,3 +40,12 @@ Copyright 2022, [Software Mansion](https://swmansion.com/?utm_source=git&utm_med
 [![Software Mansion](https://logo.swmansion.com/logo?color=white&variant=desktop&width=200&tag=membrane-github)](https://swmansion.com/?utm_source=git&utm_medium=readme&utm_campaign=membrane_stream_plugin)
 
 Licensed under the [Apache License, Version 2.0](LICENSE)
+
+## Credits
+
+This plugin has been built thanks to the support from [dscout](https://dscout.com/) and [Software Mansion](https://swmansion.com).
+
+<div style="display: flex; flex-flow: row; gap: 20px">
+  <img alt="dscout" height="100" src="./.github/dscout_logo.png"/>
+  <img alt="Software Mansion" src="https://logo.swmansion.com/logo?color=white&variant=desktop&width=150&tag=react-native-reanimated-github"/>
+</div>
