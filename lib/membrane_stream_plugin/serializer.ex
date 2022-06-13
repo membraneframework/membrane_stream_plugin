@@ -2,7 +2,7 @@ defmodule Membrane.Stream.Serializer do
   @moduledoc """
   Element recording a stream of Membrane actions into binary format, suitable for saving to the file.
 
-  Currently supported:
+  Currently supported, as of V#{Membrane.Stream.Format.get_current_version()}:
   - buffers
   - caps
   - events
@@ -27,13 +27,13 @@ defmodule Membrane.Stream.Serializer do
                 default: Format.get_current_version()
               ]
 
-  @impl Membrane.Element.Base
+  @impl true
   def handle_init(%__MODULE__{version: version}) do
     {:ok, serializer_fn} = Format.get_serializer(version)
     {:ok, %{serializer_fn: serializer_fn, version: version}}
   end
 
-  @impl Membrane.Element.Base
+  @impl true
   def handle_prepared_to_playing(_ctx, state) do
     caps = %RemoteStream{content_format: Membrane.Stream}
 
@@ -45,22 +45,22 @@ defmodule Membrane.Stream.Serializer do
     {{:ok, caps: {:output, caps}, buffer: {:output, header}}, state}
   end
 
-  @impl Membrane.Element.WithInputPads
+  @impl true
   def handle_caps(:input, caps, _ctx, state) do
     process({:caps, caps}, state)
   end
 
-  @impl Membrane.Filter
+  @impl true
   def handle_process(:input, buffer, _ctx, state) do
     process({:buffer, buffer}, state)
   end
 
-  @impl Membrane.Element.Base
+  @impl true
   def handle_event(:input, event, _ctx, state) do
     process({:event, event}, state)
   end
 
-  @impl Membrane.Element.WithInputPads
+  @impl true
   def handle_end_of_stream(:input, _ctx, state), do: {{:ok, end_of_stream: :output}, state}
 
   defp process(action, state) do

@@ -19,15 +19,15 @@ defmodule Membrane.Stream.Deserializer do
     caps: :any,
     demand_mode: :auto
 
-  @impl Membrane.Element.Base
+  @impl true
   def handle_init(_opts) do
     {:ok, %{partial: <<>>, header_read?: false, parser_fn: nil}}
   end
 
-  @impl Membrane.Element.WithInputPads
+  @impl true
   def handle_caps(:input, _caps, _ctx, state), do: {:ok, state}
 
-  @impl Membrane.Filter
+  @impl true
   def handle_process(:input, %Buffer{payload: payload}, ctx, %{header_read?: false} = state) do
     data = state.partial <> payload
     state = %{state | partial: data}
@@ -46,7 +46,7 @@ defmodule Membrane.Stream.Deserializer do
     end
   end
 
-  @impl Membrane.Filter
+  @impl true
   def handle_process(:input, %Buffer{payload: payload}, _ctx, %{header_read?: true} = state) do
     data = state.partial <> payload
     state = %{state | partial: data}
