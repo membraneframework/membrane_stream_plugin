@@ -30,7 +30,6 @@ defmodule Membrane.Stream.SerializerTest do
         ]
 
         {:ok, pid} = Pipeline.start_link(links: ParentSpec.link_linear(children))
-        Pipeline.execute_actions(pid, playback: :playing)
 
         assert_start_of_stream(pid, :sink)
 

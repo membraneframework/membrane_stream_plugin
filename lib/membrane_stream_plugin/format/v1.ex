@@ -4,7 +4,7 @@ defmodule Membrane.Stream.Format.V1 do
 
   require Logger
 
-  @magic "Action"
+  @magic "TERM"
 
   @spec parse(binary()) ::
           {:ok, actions :: [Membrane.Element.Action.t()], leftover :: binary()}
@@ -20,7 +20,7 @@ defmodule Membrane.Stream.Format.V1 do
   def serialize(action) do
     stringified = :erlang.term_to_binary(action)
     size = byte_size(stringified)
-    <<"Action", size::32, stringified::binary>>
+    <<@magic, size::32, stringified::binary>>
   end
 
   defp do_parse(data, acc \\ [])

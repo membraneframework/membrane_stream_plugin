@@ -1,9 +1,14 @@
 defmodule Membrane.Stream.Deserializer do
-  @moduledoc false
+  @moduledoc """
+  Element restoring recorded data in Membrane.Stream format, as captured by `Membrane.Stream.Serializer`
+  """
   use Membrane.Filter
 
   alias Membrane.{Buffer, RemoteStream}
   alias Membrane.Caps.Matcher
+
+  alias Membrane.Stream.Format
+  alias Membrane.Stream.Format.Header
 
   def_input_pad :input,
     caps: {RemoteStream, content_format: Matcher.one_of([nil, Membrane.Stream])},
@@ -14,33 +19,34 @@ defmodule Membrane.Stream.Deserializer do
     caps: :any,
     demand_mode: :auto
 
-  @impl true
+  @impl Membrane.Element.Base
   def handle_init(_opts) do
     {:ok, %{partial: <<>>, header_read?: false, parser_fn: nil}}
   end
 
-  @impl true
+  @impl Membrane.Element.WithInputPads
   def handle_caps(:input, _caps, _ctx, state), do: {:ok, state}
 
-  @impl true
-  def handle_process(:input, %Buffer{payload: payload}, _ctx, %{header_read?: false} = state) do
+  @impl Membrane.Filter
+  def handle_process(:input, %Buffer{payload: payload}, ctx, %{header_read?: false} = state) do
     data = state.partial <> payload
     state = %{state | partial: data}
 
-    case Membrane.Stream.Format.Header.parse(data) do
-      {:ok, %Membrane.Stream.Format.Header{version: version}, leftover} ->
-        {:ok, parser_fn} = Membrane.Stream.Format.get_parser(version)
-        {:ok, %{state | parser_fn: parser_fn, partial: leftover, header_read?: true}}
+    case Header.parse(data) do
+      {:ok, %Header{version: version}, leftover} ->
+        {:ok, parser_fn} = Format.get_parser(version)
+        state = %{state | parser_fn: parser_fn, partial: leftover, header_read?: true}
+        handle_process(:input, %Buffer{payload: ""}, ctx, state)
 
       {:error, :not_enough_data} ->
         {:ok, state}
 
       {:error, reason} ->
-        raise "Failed to parse Membrane Stream header with reason: #{inspect(reason)}"
+        raise "Failed to parse MSR header with reason: #{inspect(reason)}. Header: #{inspect(data, limit: :infinity)}"
     end
   end
 
-  @impl true
+  @impl Membrane.Filter
   def handle_process(:input, %Buffer{payload: payload}, _ctx, %{header_read?: true} = state) do
     data = state.partial <> payload
     state = %{state | partial: data}
@@ -53,7 +59,7 @@ defmodule Membrane.Stream.Deserializer do
         {:ok, state}
 
       {:error, reason} ->
-        raise "Failed to parse Membrane Stream payload with reason: #{inspect(reason)}"
+        raise "Failed to parse Membrane Stream payload with reason: #{inspect(reason)}. Data: #{inspect(data, limit: :infinity)}"
     end
   end
 end
