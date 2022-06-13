@@ -31,15 +31,12 @@ end
 
 ## Usage
 
-For usage example, please refer to `examples/round_trip.exs`
+For usage example, please refer to [`examples/udp_transfer.exs`](examples/udp_transfer.exs).
+To run it, simply execute:
 
-## Copyright and License
-
-Copyright 2022, [Software Mansion](https://swmansion.com/?utm_source=git&utm_medium=readme&utm_campaign=membrane_stream_plugin)
-
-[![Software Mansion](https://logo.swmansion.com/logo?color=white&variant=desktop&width=200&tag=membrane-github)](https://swmansion.com/?utm_source=git&utm_medium=readme&utm_campaign=membrane_stream_plugin)
-
-Licensed under the [Apache License, Version 2.0](LICENSE)
+```bash
+$ elixir examples/udp_transfer.exs
+```
 
 ## Credits
 
@@ -49,3 +46,11 @@ This plugin has been built thanks to the support from [dscout](https://dscout.co
   <img alt="dscout" height="100" src="./.github/dscout_logo.png"/>
   <img alt="Software Mansion" src="https://logo.swmansion.com/logo?color=white&variant=desktop&width=150&tag=react-native-reanimated-github"/>
 </div>
+
+## Copyright and License
+
+Copyright 2022, [Software Mansion](https://swmansion.com/?utm_source=git&utm_medium=readme&utm_campaign=membrane_stream_plugin)
+
+[![Software Mansion](https://logo.swmansion.com/logo?color=white&variant=desktop&width=200&tag=membrane-github)](https://swmansion.com/?utm_source=git&utm_medium=readme&utm_campaign=membrane_stream_plugin)
+
+Licensed under the [Apache License, Version 2.0](LICENSE)
