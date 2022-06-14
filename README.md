@@ -31,12 +31,14 @@ end
 
 ## Usage
 
-For usage example, please refer to [`examples/udp_transfer.exs`](examples/udp_transfer.exs).
+For usage example, please refer to [`examples/split_pipeline.exs`](examples/split_pipeline.exs).
 To run it, simply execute:
 
 ```bash
-$ elixir examples/udp_transfer.exs
+$ elixir examples/split_pipeline.exs
 ```
+
+The example demonstrates a simple pipeline playing the H264 file using SDL Player, split in half using Membrane Stream Plugin capabilities.
 
 ## Credits
 
@@ -44,7 +46,7 @@ This plugin has been built thanks to the support from [dscout](https://dscout.co
 
 <div style="display: flex; flex-flow: row; gap: 20px">
   <img alt="dscout" height="100" src="./.github/dscout_logo.png"/>
-  <img alt="Software Mansion" src="https://logo.swmansion.com/logo?color=white&variant=desktop&width=150&tag=react-native-reanimated-github"/>
+  <img alt="Software Mansion" src="https://logo.swmansion.com/logo?color=white&variant=desktop&width=150&tag=membrane_stream_plugin"/>
 </div>
 
 ## Copyright and License
