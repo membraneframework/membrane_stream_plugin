@@ -2,7 +2,7 @@ defmodule Membrane.Stream.Serializer do
   @moduledoc """
   Element recording a stream of Membrane actions into binary format, suitable for saving to the file.
 
-  Currently supported, as of V#{Membrane.Stream.Format.get_current_version()}:
+  Currently supported, as of V#{Membrane.Stream.Format.Versions.get_current_version()}:
   - buffers
   - caps
   - events
@@ -11,7 +11,7 @@ defmodule Membrane.Stream.Serializer do
   """
   use Membrane.Filter
   alias Membrane.{Buffer, RemoteStream}
-  alias Membrane.Stream.{Format, Format.Header}
+  alias Membrane.Stream.{Format, Format.Header, Format.Versions}
 
   def_input_pad :input,
     caps: :any,
@@ -24,12 +24,12 @@ defmodule Membrane.Stream.Serializer do
 
   def_options version: [
                 spec: Format.version_t(),
-                default: Format.get_current_version()
+                default: Versions.get_current_version()
               ]
 
   @impl true
   def handle_init(%__MODULE__{version: version}) do
-    {:ok, serializer_fn} = Format.get_serializer(version)
+    {:ok, serializer_fn} = Versions.get_serializer(version)
     {:ok, %{serializer_fn: serializer_fn, version: version}}
   end
 
