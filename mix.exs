@@ -15,7 +15,8 @@ defmodule Membrane.Stream.Mixfile do
       dialyzer: dialyzer(),
 
       # hex
-      description: "Template Plugin for Membrane Multimedia Framework",
+      description:
+        "Plugin for dumping and restoring a Membrane Stream to and from a binary format",
       package: package(),
 
       # docs
