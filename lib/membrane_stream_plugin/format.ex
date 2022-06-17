@@ -1,18 +1,24 @@
 defmodule Membrane.Stream.Format do
-  @moduledoc """
-  Module containing definition of behavior describing the implementation of specific version of the format and common type definitions
-  """
+  @moduledoc false
+  # Module containing definition of behavior describing the implementation of specific version of the format and common type definitions
 
+  @typedoc """
+  Type describing actions carried by `Membrane.Stream`
+  """
   @type action_t() ::
           {:buffer, Membrane.Buffer.t()}
           | {:event, any()}
           | {:caps, any()}
 
-  @type version_t() :: 1
+  @typedoc """
+
+  """
   @type parser_return_t() ::
           {:ok, actions :: [Membrane.Element.Action.t()], leftover :: binary()}
           | {:error, reason :: atom()}
   @type parser_t() :: (binary() -> parser_return_t())
+
+  @type serializer_t() :: (action_t() -> binary())
 
   @doc """
   Function that parses the body of the file format and returns the resulting Membrane actions.

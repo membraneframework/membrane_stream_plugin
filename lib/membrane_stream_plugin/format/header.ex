@@ -25,8 +25,8 @@ defmodule Membrane.Stream.Format.Header do
     {:error, :malformed}
   end
 
-  @spec build_header(non_neg_integer()) :: binary()
-  def build_header(version) do
+  @spec build(non_neg_integer()) :: binary()
+  def build(version) do
     <<@magic, version::8>>
   end
 end

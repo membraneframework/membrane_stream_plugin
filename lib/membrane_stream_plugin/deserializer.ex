@@ -7,7 +7,8 @@ defmodule Membrane.Stream.Deserializer do
   alias Membrane.{Buffer, RemoteStream}
   alias Membrane.Caps.Matcher
 
-  alias Membrane.Stream.Format.{Header, Versions}
+  alias Membrane.Stream.Format.Header
+  alias Membrane.Stream.Utils
 
   def_input_pad :input,
     caps: {RemoteStream, content_format: Matcher.one_of([nil, Membrane.Stream])},
@@ -33,7 +34,7 @@ defmodule Membrane.Stream.Deserializer do
 
     case Header.parse(data) do
       {:ok, %Header{version: version}, leftover} ->
-        {:ok, parser_fn} = Versions.get_parser(version)
+        {:ok, parser_fn} = Utils.get_parser(version)
         state = %{state | parser_fn: parser_fn, partial: leftover, header_read?: true}
         handle_process(:input, %Buffer{payload: ""}, ctx, state)
 

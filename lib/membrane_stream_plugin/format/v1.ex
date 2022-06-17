@@ -1,5 +1,6 @@
 defmodule Membrane.Stream.Format.V1 do
   @moduledoc false
+
   @behaviour Membrane.Stream.Format
 
   require Logger
