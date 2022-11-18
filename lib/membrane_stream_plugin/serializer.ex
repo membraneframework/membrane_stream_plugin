@@ -4,7 +4,7 @@ defmodule Membrane.Stream.Serializer do
 
   Currently supported, as of V#{Membrane.Stream.Utils.get_current_version()}:
   - buffers
-  - stream_format
+  - stream formats
   - events
 
   A stream can be replayed using `Membrane.Stream.Deserializer`:

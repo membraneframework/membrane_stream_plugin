@@ -1,6 +1,9 @@
 defmodule Membrane.Stream.SerializerTest do
   use ExUnit.Case, async: true
+
   import Membrane.Testing.Assertions
+  import Membrane.ChildrenSpec
+
   alias Membrane.{Buffer, ChildrenSpec, RemoteStream, Testing.Pipeline}
 
   alias Membrane.Stream.{Deserializer, Format.Header, Serializer}
@@ -21,8 +24,6 @@ defmodule Membrane.Stream.SerializerTest do
           buffer: {:output, %Buffer{payload: "3"}},
           event: {:output, %Event{data: :b}}
         ]
-
-        import ChildrenSpec
 
         structure = [
           child(:source, %TestingSource{actions: scenario})

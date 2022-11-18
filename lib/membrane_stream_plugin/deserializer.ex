@@ -24,6 +24,9 @@ defmodule Membrane.Stream.Deserializer do
   end
 
   @impl true
+  def handle_stream_format(:input, _stream_format, _ctx, state), do: {[], state}
+
+  @impl true
   def handle_process(:input, %Buffer{payload: payload}, ctx, %{header_read?: false} = state) do
     data = state.partial <> payload
     state = %{state | partial: data}
