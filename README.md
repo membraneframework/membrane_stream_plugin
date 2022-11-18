@@ -13,7 +13,7 @@ Format used by Membrane Stream Plugin features:
 - self delimitation, so buffers sent out of `Membrane.Stream.Serializer` are suitable to be saved to a file or sent over UDP
 - Consistency checks in form of magic keyword repeated before every term
 
-As of version 1, Membrane Stream Format supports buffers, caps and events. Dynamic pads are not supported.
+As of version 1, Membrane Stream Format supports buffers, stream_format and events. Dynamic pads are not supported.
 
 It is part of [Membrane Multimedia Framework](https://membraneframework.org).
 

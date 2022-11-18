@@ -4,7 +4,7 @@ defmodule Membrane.Stream.Serializer do
 
   Currently supported, as of V#{Membrane.Stream.Utils.get_current_version()}:
   - buffers
-  - caps
+  - stream_format
   - events
 
   A stream can be replayed using `Membrane.Stream.Deserializer`:
@@ -16,12 +16,12 @@ defmodule Membrane.Stream.Serializer do
   alias Membrane.Stream.Utils
 
   def_input_pad :input,
-    caps: :any,
+    accepted_format: _any,
     demand_mode: :auto,
     demand_unit: :buffers
 
   def_output_pad :output,
-    caps: {RemoteStream, content_format: Membrane.Stream},
+    accepted_format: %RemoteStream{content_format: Membrane.Stream},
     demand_mode: :auto
 
   def_options version: [
@@ -30,26 +30,26 @@ defmodule Membrane.Stream.Serializer do
               ]
 
   @impl true
-  def handle_init(%__MODULE__{version: version}) do
+  def handle_init(_ctx, %__MODULE__{version: version}) do
     {:ok, serializer_fn} = Utils.get_serializer(version)
-    {:ok, %{serializer_fn: serializer_fn, version: version}}
+    {[], %{serializer_fn: serializer_fn, version: version}}
   end
 
   @impl true
-  def handle_prepared_to_playing(_ctx, state) do
-    caps = %RemoteStream{content_format: Membrane.Stream}
+  def handle_playing(_ctx, state) do
+    stream_format = %RemoteStream{content_format: Membrane.Stream}
 
     header =
       state.version
       |> Header.build()
       |> then(&%Buffer{payload: &1})
 
-    {{:ok, caps: {:output, caps}, buffer: {:output, header}}, state}
+    {[stream_format: {:output, stream_format}, buffer: {:output, header}], state}
   end
 
   @impl true
-  def handle_caps(:input, caps, _ctx, state) do
-    process({:caps, caps}, state)
+  def handle_stream_format(:input, stream_format, _ctx, state) do
+    process({:stream_format, stream_format}, state)
   end
 
   @impl true
@@ -63,10 +63,10 @@ defmodule Membrane.Stream.Serializer do
   end
 
   @impl true
-  def handle_end_of_stream(:input, _ctx, state), do: {{:ok, end_of_stream: :output}, state}
+  def handle_end_of_stream(:input, _ctx, state), do: {[end_of_stream: :output], state}
 
   defp process(action, state) do
     serialized = state.serializer_fn.(action)
-    {{:ok, buffer: {:output, %Buffer{payload: serialized}}}, state}
+    {[buffer: {:output, %Buffer{payload: serialized}}], state}
   end
 end
