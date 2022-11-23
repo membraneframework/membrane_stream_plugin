@@ -4,7 +4,7 @@ defmodule Membrane.Stream.SerializerTest do
   import Membrane.Testing.Assertions
   import Membrane.ChildrenSpec
 
-  alias Membrane.{Buffer, ChildrenSpec, RemoteStream, Testing.Pipeline}
+  alias Membrane.{Buffer, RemoteStream, Testing.Pipeline}
 
   alias Membrane.Stream.{Deserializer, Format.Header, Serializer}
   alias Membrane.Stream.Test.Support.TestingSource
@@ -52,7 +52,7 @@ defmodule Membrane.Stream.SerializerTest do
       end
 
       test "Serializer creates correct header" do
-        assert {[], state} = Serializer.handle_init(%{}, %Serializer{version: unquote(version)})
+        assert {[], state} = Serializer.handle_init(nil, %Serializer{version: unquote(version)})
         assert {actions, _state} = Serializer.handle_playing(nil, state)
 
         assert {:output, %Buffer{payload: header}} = Keyword.fetch!(actions, :buffer)
