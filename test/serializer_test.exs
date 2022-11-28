@@ -1,7 +1,10 @@
 defmodule Membrane.Stream.SerializerTest do
   use ExUnit.Case, async: true
+
   import Membrane.Testing.Assertions
-  alias Membrane.{Buffer, ParentSpec, RemoteStream, Testing.Pipeline}
+  import Membrane.ChildrenSpec
+
+  alias Membrane.{Buffer, RemoteStream, Testing.Pipeline}
 
   alias Membrane.Stream.{Deserializer, Format.Header, Serializer}
   alias Membrane.Stream.Test.Support.TestingSource
@@ -14,7 +17,7 @@ defmodule Membrane.Stream.SerializerTest do
     describe describe_str do
       test "Passes end-to-end integration test" do
         scenario = [
-          caps: {:output, %RemoteStream{content_format: Testing}},
+          stream_format: {:output, %RemoteStream{content_format: Testing}},
           buffer: {:output, %Buffer{payload: "1"}},
           event: {:output, %Event{data: :a}},
           buffer: {:output, %Buffer{payload: "2"}},
@@ -22,21 +25,26 @@ defmodule Membrane.Stream.SerializerTest do
           event: {:output, %Event{data: :b}}
         ]
 
-        children = [
-          source: %TestingSource{actions: scenario},
-          serializer: %Serializer{version: unquote(version)},
-          deserializer: Deserializer,
-          sink: Membrane.Testing.Sink
+        structure = [
+          child(:source, %TestingSource{actions: scenario})
+          |> child(:serializer, %Serializer{version: unquote(version)})
+          |> child(:deserializer, Deserializer)
+          |> child(:sink, Membrane.Testing.Sink)
         ]
 
-        {:ok, pid} = Pipeline.start_link(links: ParentSpec.link_linear(children))
+        {:ok, _supervisor_pid, pid} = Pipeline.start_link(structure: structure)
 
         assert_start_of_stream(pid, :sink)
 
         Enum.each(scenario, fn
-          {:buffer, {:output, buffer}} -> assert_sink_buffer(pid, :sink, ^buffer)
-          {:caps, {:output, caps}} -> assert_sink_caps(pid, :sink, ^caps)
-          {:event, {:output, event}} -> assert_sink_event(pid, :sink, ^event)
+          {:buffer, {:output, buffer}} ->
+            assert_sink_buffer(pid, :sink, ^buffer)
+
+          {:stream_format, {:output, stream_format}} ->
+            assert_sink_stream_format(pid, :sink, ^stream_format)
+
+          {:event, {:output, event}} ->
+            assert_sink_event(pid, :sink, ^event)
         end)
 
         assert_end_of_stream(pid, :sink)
@@ -44,8 +52,8 @@ defmodule Membrane.Stream.SerializerTest do
       end
 
       test "Serializer creates correct header" do
-        assert {:ok, state} = Serializer.handle_init(%Serializer{version: unquote(version)})
-        assert {{:ok, actions}, _state} = Serializer.handle_prepared_to_playing(nil, state)
+        assert {[], state} = Serializer.handle_init(nil, %Serializer{version: unquote(version)})
+        assert {actions, _state} = Serializer.handle_playing(nil, state)
 
         assert {:output, %Buffer{payload: header}} = Keyword.fetch!(actions, :buffer)
         assert {:ok, %Header{version: unquote(version)}, <<>>} = Header.parse(header)

@@ -8,7 +8,7 @@ defmodule Membrane.Stream.Format do
   @type action_t() ::
           {:buffer, Membrane.Buffer.t()}
           | {:event, any()}
-          | {:caps, any()}
+          | {:stream_format, any()}
 
   @typedoc """
 

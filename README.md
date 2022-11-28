@@ -13,7 +13,7 @@ Format used by Membrane Stream Plugin features:
 - self delimitation, so buffers sent out of `Membrane.Stream.Serializer` are suitable to be saved to a file or sent over UDP
 - Consistency checks in form of magic keyword repeated before every term
 
-As of version 1, Membrane Stream Format supports buffers, caps and events. Dynamic pads are not supported.
+As of version 1, Membrane Stream Format supports buffers, stream formats and events. Dynamic pads are not supported.
 
 It is part of [Membrane Multimedia Framework](https://membraneframework.org).
 
@@ -24,7 +24,7 @@ The package can be installed by adding `membrane_stream_plugin` to your list of 
 ```elixir
 def deps do
   [
-    {:membrane_stream_plugin, "~> 0.1.0"}
+    {:membrane_stream_plugin, "~> 0.2.0"}
   ]
 end
 ```

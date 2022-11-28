@@ -5,27 +5,26 @@ defmodule Membrane.Stream.Deserializer do
   use Membrane.Filter
 
   alias Membrane.{Buffer, RemoteStream}
-  alias Membrane.Caps.Matcher
 
   alias Membrane.Stream.Format.Header
   alias Membrane.Stream.Utils
 
   def_input_pad :input,
-    caps: {RemoteStream, content_format: Matcher.one_of([nil, Membrane.Stream])},
+    accepted_format: %RemoteStream{content_format: format} when format in [nil, Membrane.Stream],
     demand_unit: :buffers,
     demand_mode: :auto
 
   def_output_pad :output,
-    caps: :any,
+    accepted_format: _any,
     demand_mode: :auto
 
   @impl true
-  def handle_init(_opts) do
-    {:ok, %{partial: <<>>, header_read?: false, parser_fn: nil}}
+  def handle_init(_ctx, _opts) do
+    {[], %{partial: <<>>, header_read?: false, parser_fn: nil}}
   end
 
   @impl true
-  def handle_caps(:input, _caps, _ctx, state), do: {:ok, state}
+  def handle_stream_format(:input, _stream_format, _ctx, state), do: {[], state}
 
   @impl true
   def handle_process(:input, %Buffer{payload: payload}, ctx, %{header_read?: false} = state) do
@@ -39,7 +38,7 @@ defmodule Membrane.Stream.Deserializer do
         handle_process(:input, %Buffer{payload: ""}, ctx, state)
 
       {:error, :not_enough_data} ->
-        {:ok, state}
+        {[], state}
 
       {:error, reason} ->
         raise "Failed to parse MSR header with reason: #{inspect(reason)}. Header: #{inspect(data, limit: :infinity)}"
@@ -53,10 +52,10 @@ defmodule Membrane.Stream.Deserializer do
 
     case state.parser_fn.(data) do
       {:ok, actions, leftover} ->
-        {{:ok, actions}, %{state | partial: leftover}}
+        {actions, %{state | partial: leftover}}
 
       {:error, :not_enough_data} ->
-        {:ok, state}
+        {[], state}
 
       {:error, reason} ->
         raise "Failed to parse Membrane Stream payload with reason: #{inspect(reason)}. Data: #{inspect(data, limit: :infinity)}"

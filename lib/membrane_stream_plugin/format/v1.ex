@@ -45,8 +45,8 @@ defmodule Membrane.Stream.Format.V1 do
         {:buffer, %Membrane.Buffer{} = buffer} ->
           {:buffer, {:output, buffer}}
 
-        {:caps, caps} ->
-          {:caps, {:output, caps}}
+        {:stream_format, stream_format} ->
+          {:stream_format, {:output, stream_format}}
 
         {:event, event} ->
           {:event, {:output, event}}
