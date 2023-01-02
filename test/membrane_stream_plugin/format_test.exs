@@ -1,4 +1,4 @@
-defmodule Membrane.Stream.SerializerTest do
+defmodule Membrane.Stream.FormatTest do
   use ExUnit.Case, async: true
 
   import Membrane.Testing.Assertions
