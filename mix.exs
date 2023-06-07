@@ -1,7 +1,7 @@
 defmodule Membrane.Stream.Mixfile do
   use Mix.Project
 
-  @version "0.2.1"
+  @version "0.3.0"
   @github_url "https://github.com/membraneframework/membrane_stream_plugin"
 
   def project do
@@ -38,7 +38,7 @@ defmodule Membrane.Stream.Mixfile do
 
   defp deps do
     [
-      {:membrane_core, "~> 0.11.0"},
+      {:membrane_core, "~> 0.12.0"},
       {:membrane_file_plugin, "~> 0.13.2", only: :test},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:dialyxir, ">= 0.0.0", only: :dev, runtime: false},
