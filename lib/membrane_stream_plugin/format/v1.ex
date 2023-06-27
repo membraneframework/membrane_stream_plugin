@@ -64,7 +64,10 @@ defmodule Membrane.Stream.Format.V1 do
   defp action_to_term(action), do: {:ok, action}
 
   defp term_to_action({:caps, caps}), do: {:ok, {:stream_format, {:output, caps}}}
-  defp term_to_action({:stream_format, stream_format}), do: {:ok, {:stream_format, {:output, stream_format}}}
+
+  defp term_to_action({:stream_format, stream_format}),
+    do: {:ok, {:stream_format, {:output, stream_format}}}
+
   defp term_to_action(:end_of_stream), do: {:ok, {:end_of_stream, :output}}
   defp term_to_action({:event, event}), do: {:ok, {:event, {:output, event}}}
   defp term_to_action({:buffer, %Buffer{} = buffer}), do: {:ok, {:buffer, {:output, buffer}}}
