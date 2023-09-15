@@ -4,13 +4,13 @@
 [![API Docs](https://img.shields.io/badge/api-docs-yellow.svg?style=flat)](https://hexdocs.pm/membrane_stream_plugin)
 [![CircleCI](https://circleci.com/gh/membraneframework/membrane_stream_plugin.svg?style=svg)](https://circleci.com/gh/membraneframework/membrane_stream_plugin)
 
-Plugin for recording whatever is sent through Membrane pads into a binary format and replaying it.
+Plugin for recording the entire stream sent through Membrane pads into a binary format and replaying it.
 This capability might be useful for creating snapshots of the stream at a given point in the pipeline for usage in tests, or for communication between two parts of the pipeline without using BEAM clusters.
 
-Format used by Membrane Stream Plugin features:
+The format used by Membrane Stream Plugin features:
 - header with version information, allowing for backwards compatibility
 - self delimitation, so buffers sent out of `Membrane.Stream.Serializer` are suitable to be saved to a file or sent over UDP
-- Consistency checks in form of magic keyword repeated before every term
+- Consistency checks in the form of a magic keyword repeated before every term
 
 As of version 1, Membrane Stream Format supports buffers, stream formats and events. Dynamic pads are not supported.
 
