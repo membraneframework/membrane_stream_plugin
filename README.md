@@ -4,8 +4,7 @@
 [![API Docs](https://img.shields.io/badge/api-docs-yellow.svg?style=flat)](https://hexdocs.pm/membrane_stream_plugin)
 [![CircleCI](https://circleci.com/gh/membraneframework/membrane_stream_plugin.svg?style=svg)](https://circleci.com/gh/membraneframework/membrane_stream_plugin)
 
-This repository contains Membrane Stream Plugin.
-It allows you to record a native stream of Membrane Buffers into a binary format and replay it.
+Plugin for recording whatever is sent through Membrane pads into a binary format and replaying it.
 This capability might be useful for creating snapshots of the stream at a given point in the pipeline for usage in tests, or for communication between two parts of the pipeline without using BEAM clusters.
 
 Format used by Membrane Stream Plugin features:
