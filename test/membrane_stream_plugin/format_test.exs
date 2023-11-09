@@ -27,32 +27,32 @@ defmodule Membrane.Stream.FormatTest do
       test "serializer compatibility", %{tmp_dir: dir} do
         output_file = Path.join(dir, "v#{unquote(version)}.msr")
 
-        structure = [
+        spec = [
           child(:source, %TestingSource{actions: scenario()})
           |> child(:serializer, %Serializer{version: unquote(version)})
           |> child(:sink, %Membrane.File.Sink{location: output_file})
         ]
 
-        {:ok, _supervisor_pid, pid} = Pipeline.start_link(structure: structure)
+        {:ok, _supervisor_pid, pid} = Pipeline.start_link(spec: spec)
         assert_start_of_stream(pid, :sink)
         assert_end_of_stream(pid, :sink)
-        Pipeline.terminate(pid, blocking?: true)
+        Pipeline.terminate(pid)
 
         assert File.exists?(output_file)
         assert File.read!(output_file) == File.read!(reference_file(unquote(version)))
       end
 
       test "deserializer" do
-        structure = [
+        spec = [
           child(:source, %Membrane.File.Source{location: reference_file(unquote(version))})
           |> child(:deserializer, Deserializer)
           |> child(:sink, Membrane.Testing.Sink)
         ]
 
-        {:ok, _supervisor_pid, pid} = Pipeline.start_link(structure: structure)
+        {:ok, _supervisor_pid, pid} = Pipeline.start_link(spec: spec)
         assert_start_of_stream(pid, :sink)
         assert_end_of_stream(pid, :sink)
-        Pipeline.terminate(pid, blocking?: true)
+        Pipeline.terminate(pid)
 
         Enum.each(scenario(), fn
           {:buffer, {:output, buffer}} ->

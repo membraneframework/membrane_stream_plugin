@@ -3,7 +3,7 @@ defmodule Membrane.Stream.Test.Support.TestingSource do
   use Membrane.Source
   alias Membrane.Element.Action
 
-  def_output_pad :output, accepted_format: _any
+  def_output_pad :output, accepted_format: _any, flow_control: :manual
 
   def_options actions: [
                 spec: [Action.t()]

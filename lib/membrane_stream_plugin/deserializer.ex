@@ -11,12 +11,11 @@ defmodule Membrane.Stream.Deserializer do
 
   def_input_pad :input,
     accepted_format: %RemoteStream{content_format: format} when format in [nil, Membrane.Stream],
-    demand_unit: :buffers,
-    demand_mode: :auto
+    flow_control: :auto
 
   def_output_pad :output,
     accepted_format: _any,
-    demand_mode: :auto
+    flow_control: :auto
 
   @impl true
   def handle_init(_ctx, _opts) do
@@ -27,7 +26,7 @@ defmodule Membrane.Stream.Deserializer do
   def handle_stream_format(:input, _stream_format, _ctx, state), do: {[], state}
 
   @impl true
-  def handle_process(:input, %Buffer{payload: payload}, ctx, %{header_read?: false} = state) do
+  def handle_buffer(:input, %Buffer{payload: payload}, ctx, %{header_read?: false} = state) do
     data = state.partial <> payload
     state = %{state | partial: data}
 
@@ -35,7 +34,7 @@ defmodule Membrane.Stream.Deserializer do
       {:ok, %Header{version: version}, leftover} ->
         {:ok, parser_fn} = Utils.get_parser(version)
         state = %{state | parser_fn: parser_fn, partial: leftover, header_read?: true}
-        handle_process(:input, %Buffer{payload: ""}, ctx, state)
+        handle_buffer(:input, %Buffer{payload: ""}, ctx, state)
 
       {:error, :not_enough_data} ->
         {[], state}
@@ -46,7 +45,7 @@ defmodule Membrane.Stream.Deserializer do
   end
 
   @impl true
-  def handle_process(:input, %Buffer{payload: payload}, _ctx, %{header_read?: true} = state) do
+  def handle_buffer(:input, %Buffer{payload: payload}, _ctx, %{header_read?: true} = state) do
     data = state.partial <> payload
     state = %{state | partial: data}
 

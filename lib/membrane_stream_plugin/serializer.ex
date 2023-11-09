@@ -17,12 +17,11 @@ defmodule Membrane.Stream.Serializer do
 
   def_input_pad :input,
     accepted_format: _any,
-    demand_mode: :auto,
-    demand_unit: :buffers
+    flow_control: :auto
 
   def_output_pad :output,
     accepted_format: %RemoteStream{content_format: Membrane.Stream},
-    demand_mode: :auto
+    flow_control: :auto
 
   def_options version: [
                 spec: Membrane.Stream.Format.Version.t(),
@@ -53,7 +52,7 @@ defmodule Membrane.Stream.Serializer do
   end
 
   @impl true
-  def handle_process(:input, buffer, _ctx, state) do
+  def handle_buffer(:input, buffer, _ctx, state) do
     process({:buffer, buffer}, state)
   end
 
