@@ -10,12 +10,9 @@ defmodule Membrane.Stream.Deserializer do
   alias Membrane.Stream.Utils
 
   def_input_pad :input,
-    accepted_format: %RemoteStream{content_format: format} when format in [nil, Membrane.Stream],
-    flow_control: :auto
+    accepted_format: %RemoteStream{content_format: format} when format in [nil, Membrane.Stream]
 
-  def_output_pad :output,
-    accepted_format: _any,
-    flow_control: :auto
+  def_output_pad :output, accepted_format: _any
 
   @impl true
   def handle_init(_ctx, _opts) do

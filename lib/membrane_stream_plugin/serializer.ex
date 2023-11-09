@@ -15,13 +15,8 @@ defmodule Membrane.Stream.Serializer do
 
   alias Membrane.Stream.Utils
 
-  def_input_pad :input,
-    accepted_format: _any,
-    flow_control: :auto
-
-  def_output_pad :output,
-    accepted_format: %RemoteStream{content_format: Membrane.Stream},
-    flow_control: :auto
+  def_input_pad :input, accepted_format: _any
+  def_output_pad :output, accepted_format: %RemoteStream{content_format: Membrane.Stream}
 
   def_options version: [
                 spec: Membrane.Stream.Format.Version.t(),
