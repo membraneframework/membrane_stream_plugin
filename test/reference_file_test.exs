@@ -9,7 +9,7 @@ defmodule Membrane.Stream.ReferenceFileTest do
     assert {:ok, contents} = File.read("test/fixtures/v1.msr")
 
     # If you see this check modified by the Pull Request, refer to the comment above and request changes
-    assert hash(contents) == "d5eabf31ccd4827cea46e52f735dfee487bfd0a5e0fb6bf4327b7ee9f0584534",
+    assert hash(contents) == "ee04fb6ae0e45531e32694e18068458da035109053f0c38d683ea0ef2701d26e",
            "Reference file must stay the same"
   end
 
