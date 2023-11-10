@@ -23,7 +23,7 @@ The package can be installed by adding `membrane_stream_plugin` to your list of 
 ```elixir
 def deps do
   [
-	  {:membrane_stream_plugin, "~> 0.3.1"}
+	{:membrane_stream_plugin, "~> 0.4.0"}
   ]
 end
 ```

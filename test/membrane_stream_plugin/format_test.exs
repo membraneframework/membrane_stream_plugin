@@ -24,51 +24,67 @@ defmodule Membrane.Stream.FormatTest do
       end
 
       @tag :tmp_dir
-      test "serializer compatibility", %{tmp_dir: dir} do
-        output_file = Path.join(dir, "v#{unquote(version)}.msr")
+      test "serializer and deserializer", %{tmp_dir: dir} do
+        tmp_file = Path.join(dir, "v#{unquote(version)}.msr")
 
-        structure = [
-          child(:source, %TestingSource{actions: scenario()})
-          |> child(:serializer, %Serializer{version: unquote(version)})
-          |> child(:sink, %Membrane.File.Sink{location: output_file})
-        ]
+        serializing_pipeline =
+          Pipeline.start_link_supervised!(
+            spec:
+              child(:source, %TestingSource{actions: scenario()})
+              |> child(:serializer, %Serializer{version: unquote(version)})
+              |> child(:sink, %Membrane.File.Sink{location: tmp_file})
+          )
 
-        {:ok, _supervisor_pid, pid} = Pipeline.start_link(structure: structure)
-        assert_start_of_stream(pid, :sink)
-        assert_end_of_stream(pid, :sink)
-        Pipeline.terminate(pid, blocking?: true)
+        assert_end_of_stream(serializing_pipeline, :sink)
+        Pipeline.terminate(serializing_pipeline)
 
-        assert File.exists?(output_file)
-        assert File.read!(output_file) == File.read!(reference_file(unquote(version)))
+        assert File.exists?(tmp_file)
+
+        deserializing_pipeline =
+          Pipeline.start_link_supervised!(
+            spec:
+              child(:source, %Membrane.File.Source{location: tmp_file})
+              |> child(:deserializer, Deserializer)
+              |> child(:sink, Membrane.Testing.Sink)
+          )
+
+        assert_scenario(deserializing_pipeline)
+        Pipeline.terminate(deserializing_pipeline)
       end
 
       test "deserializer" do
-        structure = [
-          child(:source, %Membrane.File.Source{location: reference_file(unquote(version))})
-          |> child(:deserializer, Deserializer)
-          |> child(:sink, Membrane.Testing.Sink)
-        ]
+        pipeline =
+          Pipeline.start_link_supervised!(
+            spec:
+              child(:source, %Membrane.File.Source{location: reference_file(unquote(version))})
+              |> child(:deserializer, Deserializer)
+              |> child(:sink, Membrane.Testing.Sink)
+          )
 
-        {:ok, _supervisor_pid, pid} = Pipeline.start_link(structure: structure)
-        assert_start_of_stream(pid, :sink)
-        assert_end_of_stream(pid, :sink)
-        Pipeline.terminate(pid, blocking?: true)
-
-        Enum.each(scenario(), fn
-          {:buffer, {:output, buffer}} ->
-            assert_sink_buffer(pid, :sink, ^buffer)
-
-          {:stream_format, {:output, stream_format}} ->
-            assert_sink_stream_format(pid, :sink, ^stream_format)
-
-          {:event, {:output, event}} ->
-            assert_sink_event(pid, :sink, ^event)
-        end)
+        assert_scenario(pipeline)
+        Pipeline.terminate(pipeline)
       end
     end
   end)
 
   defp reference_file(version), do: Path.join(["test", "fixtures", "v#{version}.msr"])
+
+  defp assert_scenario(pipeline) do
+    assert_start_of_stream(pipeline, :sink)
+
+    Enum.each(scenario(), fn
+      {:buffer, {:output, buffer}} ->
+        assert_sink_buffer(pipeline, :sink, ^buffer)
+
+      {:stream_format, {:output, stream_format}} ->
+        assert_sink_stream_format(pipeline, :sink, ^stream_format)
+
+      {:event, {:output, event}} ->
+        assert_sink_event(pipeline, :sink, ^event)
+    end)
+
+    assert_end_of_stream(pipeline, :sink)
+  end
 
   defp scenario do
     [
