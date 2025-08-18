@@ -3,12 +3,13 @@
 
 # Installs mix dependencies
 Mix.install([
-  {:membrane_core, "~> 0.10.1"},
-  {:membrane_hackney_plugin, "~> 0.8.2"},
-  {:membrane_h264_ffmpeg_plugin, "~> 0.21.1"},
-  {:membrane_sdl_plugin, "~> 0.14.0"},
-  {:membrane_stream_plugin, path: __DIR__ |> Path.join("..") |> Path.expand()},
-  {:membrane_file_plugin, "~> 0.12.0"}
+  {:membrane_core, "~> 1.0"},
+  {:membrane_hackney_plugin, "~> 0.11.0"},
+  {:membrane_h26x_plugin, "~> 0.10.0"},
+  {:membrane_h264_ffmpeg_plugin, "~> 0.32.0"},
+  {:membrane_sdl_plugin, "~> 0.18.0"},
+  {:membrane_stream_plugin, "~> 0.4.0"},
+  {:membrane_file_plugin, "~> 0.17.0"}
 ])
 
 # This pipeline is responsible for downloading the content from our static repository and
@@ -18,33 +19,34 @@ defmodule Sender do
   use Membrane.Pipeline
 
   @impl true
-  def handle_init(_opts) do
-    children = [
-      source: %Membrane.Hackney.Source{
+  def handle_init(_ctx, _opts) do
+    spec =
+      child(:source, %Membrane.Hackney.Source{
         location:
           "https://raw.githubusercontent.com/membraneframework/static/gh-pages/samples/ffmpeg-testsrc.h264",
         hackney_opts: [follow_redirect: true]
-      },
-      parser: %Membrane.H264.FFmpeg.Parser{framerate: {30, 1}, alignment: :au},
-      decoder: Membrane.H264.FFmpeg.Decoder,
-      serializer: Membrane.Stream.Serializer,
-      sink: %Membrane.File.Sink{location: "example.msr"}
-    ]
+      })
+      |> child(:parser, %Membrane.H264.Parser{
+        generate_best_effort_timestamps: %{framerate: {30, 1}},
+        output_alignment: :au
+      })
+      |> child(:decoder, Membrane.H264.FFmpeg.Decoder)
+      |> child(:serializer, Membrane.Stream.Serializer)
+      |> child(:sink, %Membrane.File.Sink{location: "example.msr"})
 
-    {{:ok, spec: %ParentSpec{links: ParentSpec.link_linear(children)}, playback: :playing}, %{}}
+    {[spec: spec], %{}}
   end
 
   # These two `handle_element_end_of_stream/3` clauses are only used to terminate the pipeline after processing finished
   # This part is considered the business logic, you don't need to worry about it in this example
   @impl true
-  def handle_element_end_of_stream({:sink, _pad}, _ctx, state) do
-    Sender.terminate(self())
-    {:ok, state}
+  def handle_element_end_of_stream(:sink, _pad, _ctx, state) do
+    {[terminate: :normal], state}
   end
 
   @impl true
-  def handle_element_end_of_stream(_element, _ctx, state) do
-    {:ok, state}
+  def handle_element_end_of_stream(_element, _pad, _ctx, state) do
+    {[], state}
   end
 end
 
@@ -53,39 +55,33 @@ defmodule Receiver do
   use Membrane.Pipeline
 
   @impl true
-  def handle_init(_opts) do
-    spec = %ParentSpec{
-      children: [
-        source: %Membrane.File.Source{location: "example.msr"},
-        deserializer: Membrane.Stream.Deserializer,
-        player: Membrane.SDL.Player
-      ],
-      links: [
-        link(:source) |> to(:deserializer) |> to(:player)
-      ]
-    }
+  def handle_init(_ctx, _opts) do
+    spec =
+      child(:source, %Membrane.File.Source{location: "example.msr"})
+      |> child(:deserializer, Membrane.Stream.Deserializer)
+      |> child(:player, Membrane.SDL.Player)
 
-    {{:ok, spec: spec, playback: :playing}, %{}}
+    {[spec: spec], %{}}
   end
 
   # These two `handle_element_end_of_stream/3` clauses are only used to terminate the pipeline after processing finished
   # This part is considered the business logic, you don't need to worry about it in this example
   @impl true
-  def handle_element_end_of_stream({:player, _pad}, _ctx, state) do
+  def handle_element_end_of_stream(:player, _pad, _ctx, state) do
     Receiver.terminate(self())
-    {:ok, state}
+    {[], state}
   end
 
   @impl true
-  def handle_element_end_of_stream(_element, _ctx, state) do
-    {:ok, state}
+  def handle_element_end_of_stream(_element, _pad, _ctx, state) do
+    {[], state}
   end
 end
 
 # Run the two pipelines one after the other
 
 ## Start the Sender and await its completion
-{:ok, sender_pid} = Sender.start_link()
+{:ok, _supervisor_pid, sender_pid} = Membrane.Pipeline.start_link(Sender)
 sender_monitor = Process.monitor(sender_pid)
 
 receive do
@@ -94,11 +90,14 @@ receive do
       do: raise("Saving a stream to a file failed with reason: #{inspect(reason)}")
 
     IO.puts("Recording has been processed and saved to a file `example.msr`")
+after
+  2_000 ->
+    raise("Saving a stream to a file failed due to timeout")
 end
 
 ## Started the Receiver and await its completion
 IO.puts("Playing the recorded file")
-{:ok, receiver_pid} = Receiver.start_link()
+{:ok, _supervisor_pid, receiver_pid} = Membrane.Pipeline.start_link(Receiver)
 receiver_monitor = Process.monitor(receiver_pid)
 
 receive do
