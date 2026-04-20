@@ -14,7 +14,8 @@ defmodule Membrane.Stream.Utils do
 
   @spec get_parser(Format.Version.t()) :: {:ok, Format.parser_t()} | {:error, reason :: atom()}
   def get_parser(version) when is_supported_version(version) do
-    {:ok, &@implementations[version].parse/1}
+    module = @implementations[version]
+    {:ok, &module.parse/1}
   end
 
   def get_parser(_version), do: {:error, :unsupported_version}
@@ -22,7 +23,8 @@ defmodule Membrane.Stream.Utils do
   @spec get_serializer(Format.Version.t()) ::
           {:ok, (Format.action_t() -> binary())} | {:error, reason :: atom()}
   def get_serializer(version) when is_supported_version(version) do
-    {:ok, &@implementations[version].serialize/1}
+    module = @implementations[version]
+    {:ok, &module.serialize/1}
   end
 
   def get_serializer(_version), do: {:error, :unsupported_version}
