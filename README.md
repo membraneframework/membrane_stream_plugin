@@ -1,8 +1,9 @@
 # Membrane Stream Plugin
 
+[![Star Membrane on GitHub ★](https://img.shields.io/github/stars/membraneframework/membrane_core?style=flat&logo=github&label=Star%20Membrane%20on%20GitHub%20%E2%98%85&color=blue)](https://github.com/membraneframework/membrane_core)
 [![Hex.pm](https://img.shields.io/hexpm/v/membrane_stream_plugin.svg)](https://hex.pm/packages/membrane_stream_plugin)
 [![API Docs](https://img.shields.io/badge/api-docs-yellow.svg?style=flat)](https://hexdocs.pm/membrane_stream_plugin)
-[![CircleCI](https://circleci.com/gh/membraneframework/membrane_stream_plugin.svg?style=svg)](https://circleci.com/gh/membraneframework/membrane_stream_plugin)
+[![CI](https://github.com/membraneframework/membrane_stream_plugin/actions/workflows/ci.yml/badge.svg)](https://github.com/membraneframework/membrane_stream_plugin/actions/workflows/ci.yml)
 
 Plugin for recording the entire stream sent through Membrane pads into a binary format and replaying it.
 This capability might be useful for creating snapshots of the stream at a given point in the pipeline for usage in tests, or for communication between two parts of the pipeline without using BEAM clusters.
